@@ -1,0 +1,40 @@
+#! /usr/bin/env python
+# -- encoding: UTF-8 --
+
+import qi
+import argparse
+import sys
+import almath
+import math
+import motion
+import time
+import os
+import httplib
+import json
+
+
+session = qi.Session()
+session.connect("tcp://192.168.0.101:9559")
+
+motion_service = session.service("ALMotion")
+animated_speech_service = session.service("ALAnimatedSpeech")
+while(1):
+	question=raw_input("Ingrese su pregunta:")
+	try:
+	    conn = httplib.HTTPConnection("192.168.0.115", 9559)
+	    data = {'question': question}
+	    json_data = json.dumps(data)
+
+	    headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+
+	    conn.request('POST', '/chat', json_data, headers)
+
+	    response = conn.getresponse()
+	    response_data = response.read()
+	 
+	    print(response_data)
+	    animated_speech_service.say(response_data)
+	    conn.close()
+
+	except Exception as e:
+	    print("Error de conexión:", e)
